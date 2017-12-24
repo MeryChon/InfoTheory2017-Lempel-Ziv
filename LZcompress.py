@@ -1,7 +1,7 @@
 import sys
 import SimpleRead
 from math import ceil, log2
-import time
+# import time
 import CompleteWrite
 
 class LZCompressor:
