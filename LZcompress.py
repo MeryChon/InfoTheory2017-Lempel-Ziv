@@ -23,14 +23,12 @@ class LZCompressor:
     def get_gamma(self, num):
         binary_num = '{0:b}'.format(num)
         gamma = '0' * (len(binary_num) - 1) + binary_num
-        print("gamma code is ", gamma)
         return gamma
 
     def compress(self):
-        print("Number of bits : ", len(self.bits_array))
         i = 0
         while True:
-            if i > len(self.bits_array):
+            if i >= len(self.bits_array):
                 break
             key = self.get_longest_prefix(i)
             b_index = '{0:b}'.format(self.dictionary[key])
@@ -43,7 +41,6 @@ class LZCompressor:
 
     def write_to_file(self):
         to_write = self.gamma_length + self.compressed
-        print("Without padding ", len(to_write))
         bytes_to_write = CompleteWrite.addPadding(to_write)
         CompleteWrite.writeToFile(self.out_f, bytes_to_write)
 
@@ -54,27 +51,14 @@ class LZCompressor:
             prefix += self.bits_array[i+j]
             if prefix in self.dictionary:
                 return prefix
-        # prefix did not fit in the dictionary, need to append 0-s
+        # prefix was not in the dictionary, need to append 0-s
         while not (prefix in self.dictionary):
             prefix += "0"
         return prefix
 
-        # max_key = ""
-        # bit_substr = self.bits_array[i:]
-        # for d in self.dictionary:
-        #     if bit_substr.startswith(d):
-        #         return d
-        # while max_key == "":
-        #     bit_substr += "0"
-        #     for d in self.dictionary:
-        #         if bit_substr.startswith(d):
-        #             return d
-
 
 if __name__ == '__main__':
-    s = time.time()
     input_file = sys.argv[1]
     output_file = sys.argv[2]
     compr = LZCompressor(input_file, output_file)
     compr.write_to_file()
-    print(time.time()-s, " seconds elapsed ")
