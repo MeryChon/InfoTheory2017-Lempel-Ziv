@@ -2,6 +2,7 @@ import sys
 import SimpleRead
 from math import ceil, log2
 import time
+import CompleteWrite
 
 class LZCompressor:
     def __init__(self, in_file, out_file):
@@ -17,7 +18,6 @@ class LZCompressor:
     def get_input_bits(self):
         initial_bytes = SimpleRead.readBytesFromFile(self.in_f)
         bits = SimpleRead.bytesToBits(initial_bytes)
-        # print(bits)
         return bits
 
     def get_gamma(self, num):
@@ -27,6 +27,7 @@ class LZCompressor:
         return gamma
 
     def compress(self):
+        print("Number of bits : ", len(self.bits_array))
         i = 0
         while True:
             if i > len(self.bits_array):
@@ -42,27 +43,32 @@ class LZCompressor:
 
     def write_to_file(self):
         to_write = self.gamma_length + self.compressed
-        to_write += "0"
-        while not (len(to_write) % 8 == 0):
-            to_write += "0"
-        # print(to_write)
-        res = int(to_write, 2).to_bytes((len(to_write) + 7) // 8, byteorder="big")
-        out_f_obj = open(self.out_f, 'wb')
-        out_f_obj.write(res)
-        out_f_obj.close()
-        # SimpleRead.writeToFile(self.out_f, res)
+        print("Without padding ", len(to_write))
+        bytes_to_write = CompleteWrite.addPadding(to_write)
+        CompleteWrite.writeToFile(self.out_f, bytes_to_write)
 
     def get_longest_prefix(self, i):
-        max_key = ""
-        bit_substr = self.bits_array[i:]
-        for d in self.dictionary:
-            if bit_substr.startswith(d):
-                return d
-        while max_key == "":
-            bit_substr += "0"
-            for d in self.dictionary:
-                if bit_substr.startswith(d):
-                    return d
+        prefix = ""
+        length_of_substr = len(self.bits_array[i:])
+        for j in range(0, length_of_substr):
+            prefix += self.bits_array[i+j]
+            if prefix in self.dictionary:
+                return prefix
+        # prefix did not fit in the dictionary, need to append 0-s
+        while not (prefix in self.dictionary):
+            prefix += "0"
+        return prefix
+
+        # max_key = ""
+        # bit_substr = self.bits_array[i:]
+        # for d in self.dictionary:
+        #     if bit_substr.startswith(d):
+        #         return d
+        # while max_key == "":
+        #     bit_substr += "0"
+        #     for d in self.dictionary:
+        #         if bit_substr.startswith(d):
+        #             return d
 
 
 if __name__ == '__main__':

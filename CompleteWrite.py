@@ -31,6 +31,7 @@ def writeToFile(destFilePath, bytes):
 		print("Could not open file for writing")
 		raise
 	resFileObject.write(bytes)
+	resFileObject.close()
 
 
 
